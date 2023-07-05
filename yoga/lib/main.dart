@@ -1,4 +1,3 @@
-import 'package:shared_preferences/shared_preferences.dart';
 import 'splashScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -22,17 +21,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-    //   final SharedPreferences prefs = await SharedPreferences.getInstance();
-    //   if (prefs.containsKey("loggedIn")) {
-    //     setState(() {
-    //       ifLoggedIn = prefs.getBool("loggedIn")!;
-    //     });
-    //   }
-    //   setState(() {
-    //     loading = false;
-    //   });
-    // });
   }
 
   @override

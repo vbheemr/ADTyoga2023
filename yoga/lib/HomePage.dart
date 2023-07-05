@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'Strings.dart';
 import 'Zoom_Scafflod_OE.dart';
 
 class HomePage extends StatefulWidget {
@@ -45,13 +44,13 @@ class _HomePageState extends State<HomePage> {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text(Strings.reconfirm),
-        content: const Text(Strings.askexit),
+        title: const Text('Are you sure?'),
+        content: const Text('Do you want to exit the Application'),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: const Text(
-              Strings.no,
+              "No",
               style: TextStyle(
                 color: Colors.black,
               ),
@@ -62,7 +61,7 @@ class _HomePageState extends State<HomePage> {
               SystemNavigator.pop();
             },
             child: const Text(
-              Strings.yes,
+              "Yes",
               style: TextStyle(
                 color: Colors.black,
               ),

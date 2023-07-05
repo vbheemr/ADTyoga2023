@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yoga/dayData.dart';
+import 'package:yoga/userChallengeData.dart';
 import 'AdvanceYoga.dart';
 import 'NumberImage.dart';
 import 'YogaInfoList.dart';
@@ -110,19 +111,15 @@ class _ZoomScaffoldOEState extends State<ZoomScaffoldOE>
     getCurrentUser();
   }
 
-  void onAddButtonTapped(int index) {
-    pageController.animateToPage(index,
-        duration: const Duration(milliseconds: 500), curve: Curves.ease);
-    pageController.jumpToPage(index);
-  }
-
   @override
   void dispose() {
     super.dispose();
     pageController.dispose();
   }
 
-  List<DayData> dayData = [];
+  // DayData dayData = DayData([]);
+  List<DayData> dayDataList = [];
+  // List<UserChallengeData> userChallengeData = [];
 
   @override
   Widget build(BuildContext context) {
@@ -154,11 +151,14 @@ class _ZoomScaffoldOEState extends State<ZoomScaffoldOE>
                         fontSize: 21.0,
                         fontWeight: FontWeight.bold),
                   ),
-                  bottom: const TabBar(
-                    tabs: [
+                  bottom: TabBar(
+                    tabs: const [
                       Tab(text: 'Beginner\'s Level'),
                       Tab(text: 'Advance Level'),
                     ],
+                    onTap: (value) {
+                      if (value == 0) {}
+                    },
                   ),
                   leading: IconButton(
                     icon: const Icon(Icons.logout),
@@ -266,7 +266,7 @@ class _ZoomScaffoldOEState extends State<ZoomScaffoldOE>
                                                   textAlign: TextAlign.center,
                                                   style: const TextStyle(
                                                     fontSize: 12.0,
-                                                    color: Colors.white,
+                                                    color: Colors.black,
                                                   ),
                                                 ),
                                               ],
@@ -306,265 +306,185 @@ class _ZoomScaffoldOEState extends State<ZoomScaffoldOE>
                         ),
                       ),
                     ),
-                    SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: SizedBox(
-                        child: Center(
-                          child: Column(
-                            children: <Widget>[
-                              StreamBuilder(
-                                builder: (context, snapshot) {
-                                  if (true) {
-                                    return GridView.builder(
-                                      shrinkWrap: true,
-                                      physics: const ClampingScrollPhysics(),
-                                      scrollDirection: Axis.vertical,
-                                      padding: const EdgeInsets.all(10.0),
-                                      gridDelegate:
-                                          const SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 3,
-                                        childAspectRatio: 1.0,
-                                        crossAxisSpacing: 10.0,
-                                        mainAxisSpacing: 10.0,
-                                      ),
-                                      itemCount: 30,
-                                      itemBuilder: (context, i) {
-                                        return StreamBuilder<Object>(
-                                            stream: FirebaseDatabase.instance
-                                                .refFromURL(
-                                                    "https://adtyoga-f8e60-default-rtdb.firebaseio.com")
-                                                .child('challenge')
-                                                .child(i < 9
-                                                    ? "day0${i + 1}"
-                                                    : "day${i + 1}")
-                                                .onValue,
-                                            builder: (context,
-                                                AsyncSnapshot snapshot) {
-                                              if (snapshot.hasData &&
-                                                  !snapshot.hasError &&
-                                                  snapshot.data!.snapshot
-                                                          .value !=
-                                                      null) {
-                                                snapshot.data.snapshot.value
-                                                    .forEach((key, value) {
-                                                  dayData[i].isDone = value;
-                                                });
-                                                // for (var v in map!) {
-                                                //   yogaList.add(
-                                                //     YogaInfoList(
-                                                //       v["about"],
-                                                //       v["yNameHindi"],
-                                                //       v["yNameEnglish"],
-                                                //       v["howToDo"],
-                                                //     ),
-                                                //   );
-                                                // }
-                                              } else {
-                                                // dayData.addAll(
-                                                //     DayData(false, [])
-                                                //         as Iterable<DayData>);
-                                              }
-                                              return SizedBox(
-                                                width: 200.0,
-                                                height: 200.0,
-                                                child: ElevatedButton(
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        7.0)),
-                                                    backgroundColor:
-                                                        Colors.blue[100],
+                    SizedBox(
+                      child: Column(
+                        children: <Widget>[
+                          Expanded(
+                            child: FutureBuilder(
+                              future: FirebaseDatabase.instance
+                                  .refFromURL(
+                                      "https://adtyoga-f8e60-default-rtdb.firebaseio.com")
+                                  .child('challenge')
+                                  .once(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot snapshot) {
+                                dayDataList.clear();
+                                if (snapshot.hasData &&
+                                    !snapshot.hasError &&
+                                    snapshot.data.snapshot.value != null) {
+                                  var data = snapshot.data.snapshot.value;
+                                  List list;
+                                  for (var i = 0; i < 30; i++) {
+                                    if (data[i < 9
+                                            ? "day0${i + 1}"
+                                            : "day${i + 1}"] !=
+                                        "") {
+                                      Map dataValue = data[i < 9
+                                          ? "day0${i + 1}"
+                                          : "day${i + 1}"];
+                                      debugPrint(dataValue.toString());
+                                      List<UserChallengeData> udata = [];
+                                      dataValue.forEach((k, v) {
+                                        list = dataValue[k];
+
+                                        for (var v in list) {
+                                          udata.add(
+                                            UserChallengeData(
+                                              v["isDone"],
+                                              v["userId"],
+                                              v["posesDone"].cast<int>(),
+                                              v["timeStamp"],
+                                            ),
+                                          );
+                                        }
+                                        debugPrint(list[0].toString());
+                                      });
+                                      dayDataList.add(DayData(udata));
+                                    } else {
+                                      dayDataList.add(DayData([
+                                        UserChallengeData(
+                                          false,
+                                          "",
+                                          [],
+                                          "",
+                                        ),
+                                      ]));
+                                    }
+                                  }
+                                  FirebaseAuth auth = FirebaseAuth.instance;
+                                  User? user = auth.currentUser;
+                                  String userID = "";
+                                  // setState(() {
+                                  userID = user!.uid;
+                                  // });
+                                  return GridView.builder(
+                                    shrinkWrap: true,
+                                    physics: const ClampingScrollPhysics(),
+                                    scrollDirection: Axis.vertical,
+                                    padding: const EdgeInsets.all(10.0),
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 3,
+                                      childAspectRatio: 1.0,
+                                      crossAxisSpacing: 10.0,
+                                      mainAxisSpacing: 10.0,
+                                    ),
+                                    itemCount: dayDataList.length,
+                                    itemBuilder: (context, i) {
+                                      // debugPrint(userID);
+                                      debugPrint(
+                                          dayDataList[i].userData[0].userId);
+                                      UserChallengeData u1 = dayDataList[i]
+                                          .userData
+                                          .firstWhere(
+                                              (element) =>
+                                                  element.userId == userID,
+                                              orElse: () => UserChallengeData(
+                                                  false, "", [], ""));
+                                      if (u1.isDone) {
+                                        return SizedBox(
+                                          width: 200.0,
+                                          height: 200.0,
+                                          child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          7.0)),
+                                              backgroundColor: Colors.blue[100],
+                                            ),
+                                            child: Container(
+                                                padding:
+                                                    const EdgeInsets.all(5.0),
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    const SizedBox(
+                                                      height: 5.0,
+                                                    ),
+                                                    Text(
+                                                      'DAY - ${i + 1}',
+                                                      style: const TextStyle(
+                                                          color: Colors.black),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 5.0,
+                                                    ),
+                                                    const Icon(
+                                                      Icons.check,
+                                                      color: Colors.black,
+                                                    )
+                                                  ],
+                                                )),
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      AdvanceYoga(
+                                                    dayNumber: i,
+                                                    userChallengeDataList:
+                                                        dayDataList[i].userData,
                                                   ),
-                                                  child: Container(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              5.0),
-                                                      child: Text(
-                                                          'DAY - ${i + 1}')),
-                                                  onPressed: () {
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            AdvanceYoga(
-                                                          yogaGIFList[i]
-                                                              .yogaName,
-                                                          yogaGIFList[i]
-                                                              .yogaGIF,
-                                                        ),
-                                                      ),
-                                                    );
-                                                  },
                                                 ),
                                               );
-                                            });
-                                      },
-                                    );
-                                  }
-                                  return const Expanded(
-                                    child: Center(
-                                        child: CircularProgressIndicator()),
+                                            },
+                                          ),
+                                        );
+                                      }
+                                      return SizedBox(
+                                        width: 200.0,
+                                        height: 200.0,
+                                        child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(7.0)),
+                                            backgroundColor: Colors.blue[100],
+                                          ),
+                                          child: Container(
+                                              padding:
+                                                  const EdgeInsets.all(5.0),
+                                              child: Text(
+                                                'DAY - ${i + 1}',
+                                                style: const TextStyle(
+                                                    color: Colors.black),
+                                              )),
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    AdvanceYoga(
+                                                  dayNumber: i,
+                                                  userChallengeDataList:
+                                                      dayDataList[i].userData,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
                                   );
-                                },
-                              )
-                              // ExpansionTile(
-                              //   title: const Text('Challenge Week - 1'),
-                              //   children: <Widget>[
-                              //     FutureBuilder(
-                              //       builder: (context, snapshot) {
-                              //         return
-                              //       },
-                              //     )
-                              //   ],
-                              // ),
-                              // ExpansionTile(
-                              //   title: const Text('Challenge Week - 2'),
-                              //   children: <Widget>[
-                              //     GridView.builder(
-                              //       shrinkWrap: true,
-                              //       physics: const ClampingScrollPhysics(),
-                              //       scrollDirection: Axis.vertical,
-                              //       padding: const EdgeInsets.all(10.0),
-                              //       gridDelegate:
-                              //           const SliverGridDelegateWithFixedCrossAxisCount(
-                              //         crossAxisCount: 3,
-                              //         childAspectRatio: 1.0,
-                              //         crossAxisSpacing: 10.0,
-                              //         mainAxisSpacing: 10.0,
-                              //       ),
-                              //       itemCount: 7,
-                              //       itemBuilder: (context, i) => SizedBox(
-                              //         width: 200.0,
-                              //         height: 200.0,
-                              //         child: ElevatedButton(
-                              //           style: ElevatedButton.styleFrom(
-                              //             shape: RoundedRectangleBorder(
-                              //                 borderRadius:
-                              //                     BorderRadius.circular(7.0)),
-                              //             backgroundColor: Colors.blue[100],
-                              //           ),
-                              //           child: Container(
-                              //               padding: const EdgeInsets.all(5.0),
-                              //               child: Text('DAY - ${i + 1}')),
-                              //           onPressed: () {
-                              //             Navigator.push(
-                              //               context,
-                              //               MaterialPageRoute(
-                              //                 builder: (context) => AdvanceYoga(
-                              //                   yogaGIFList[i].yogaName,
-                              //                   yogaGIFList[i].yogaGIF,
-                              //                   i,
-                              //                   2,
-                              //                 ),
-                              //               ),
-                              //             );
-                              //           },
-                              //         ),
-                              //       ),
-                              //     ),
-                              //   ],
-                              // ),
-                              // ExpansionTile(
-                              //   title: const Text('Challenge Week - 3'),
-                              //   children: <Widget>[
-                              //     GridView.builder(
-                              //       shrinkWrap: true,
-                              //       physics: const ClampingScrollPhysics(),
-                              //       scrollDirection: Axis.vertical,
-                              //       padding: const EdgeInsets.all(10.0),
-                              //       gridDelegate:
-                              //           const SliverGridDelegateWithFixedCrossAxisCount(
-                              //         crossAxisCount: 3,
-                              //         childAspectRatio: 1.0,
-                              //         crossAxisSpacing: 10.0,
-                              //         mainAxisSpacing: 10.0,
-                              //       ),
-                              //       itemCount: 7,
-                              //       itemBuilder: (context, i) => SizedBox(
-                              //         width: 200.0,
-                              //         height: 200.0,
-                              //         child: ElevatedButton(
-                              //           style: ElevatedButton.styleFrom(
-                              //             shape: RoundedRectangleBorder(
-                              //                 borderRadius:
-                              //                     BorderRadius.circular(7.0)),
-                              //             backgroundColor: Colors.blue[100],
-                              //           ),
-                              //           child: Container(
-                              //               padding: const EdgeInsets.all(5.0),
-                              //               child: Text('DAY - ${i + 1}')),
-                              //           onPressed: () {
-                              //             Navigator.push(
-                              //               context,
-                              //               MaterialPageRoute(
-                              //                 builder: (context) => AdvanceYoga(
-                              //                   yogaGIFList[i].yogaName,
-                              //                   yogaGIFList[i].yogaGIF,
-                              //                   i,
-                              //                   3,
-                              //                 ),
-                              //               ),
-                              //             );
-                              //           },
-                              //         ),
-                              //       ),
-                              //     ),
-                              //   ],
-                              // ),
-                              // ExpansionTile(
-                              //   title: const Text('Challenge Week - 4'),
-                              //   children: <Widget>[
-                              //     GridView.builder(
-                              //       shrinkWrap: true,
-                              //       physics: const ClampingScrollPhysics(),
-                              //       scrollDirection: Axis.vertical,
-                              //       padding: const EdgeInsets.all(10.0),
-                              //       gridDelegate:
-                              //           const SliverGridDelegateWithFixedCrossAxisCount(
-                              //         crossAxisCount: 3,
-                              //         childAspectRatio: 1.0,
-                              //         crossAxisSpacing: 10.0,
-                              //         mainAxisSpacing: 10.0,
-                              //       ),
-                              //       itemCount: 7,
-                              //       itemBuilder: (context, i) => SizedBox(
-                              //         width: 200.0,
-                              //         height: 200.0,
-                              //         child: ElevatedButton(
-                              //           style: ElevatedButton.styleFrom(
-                              //             shape: RoundedRectangleBorder(
-                              //                 borderRadius:
-                              //                     BorderRadius.circular(7.0)),
-                              //             backgroundColor: Colors.blue[100],
-                              //           ),
-                              //           child: Container(
-                              //               padding: const EdgeInsets.all(5.0),
-                              //               child: Text('DAY - ${i + 1}')),
-                              //           onPressed: () {
-                              //             Navigator.push(
-                              //               context,
-                              //               MaterialPageRoute(
-                              //                 builder: (context) => AdvanceYoga(
-                              //                   yogaGIFList[i].yogaName,
-                              //                   yogaGIFList[i].yogaGIF,
-                              //                   i,
-                              //                   4,
-                              //                 ),
-                              //               ),
-                              //             );
-                              //           },
-                              //         ),
-                              //       ),
-                              //     ),
-                              //   ],
-                              // ),
-                            ],
+                                }
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              },
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ],
