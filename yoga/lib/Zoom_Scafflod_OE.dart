@@ -92,23 +92,28 @@ class _ZoomScaffoldOEState extends State<ZoomScaffoldOE>
   late User loggedinUser;
 
   //using this function you can use the credentials of the user
-  void getCurrentUser() {
-    try {
-      final user = _auth.currentUser;
-      if (user != null) {
-        loggedinUser = user;
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-  }
+  // void getCurrentUser() {
+  //   try {
+  //     final user = _auth.currentUser;
+  //     if (user != null) {
+  //       loggedinUser = user;
+  //     }
+  //   } catch (e) {
+  //     debugPrint(e.toString());
+  //   }
+  // }
 
   // var dbRef = ;
 
   @override
   void initState() {
     super.initState();
-    getCurrentUser();
+    // getCurrentUser();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
   }
 
   @override
@@ -119,7 +124,57 @@ class _ZoomScaffoldOEState extends State<ZoomScaffoldOE>
 
   // DayData dayData = DayData([]);
   List<DayData> dayDataList = [];
+  bool loading = false;
   // List<UserChallengeData> userChallengeData = [];
+
+  fetchDataChallenge() async {
+    await FirebaseDatabase.instance
+        .refFromURL("https://adtyoga-f8e60-default-rtdb.firebaseio.com")
+        .child('challenge')
+        .once()
+        .then((value) {
+      setState(() {
+        loading = true;
+        dayDataList.clear();
+      });
+      var data = value.snapshot.value as Map;
+      List list;
+      for (var i = 0; i < 30; i++) {
+        if (data[i < 9 ? "day0${i + 1}" : "day${i + 1}"] != "") {
+          Map dataValue = data[i < 9 ? "day0${i + 1}" : "day${i + 1}"];
+          List<UserChallengeData> udata = [];
+          dataValue.forEach((k, v) {
+            list = dataValue[k];
+
+            for (var v in list) {
+              udata.add(
+                UserChallengeData(
+                  v["isDone"],
+                  v["userId"],
+                  v["posesDone"].cast<int>(),
+                  v["timeStamp"],
+                ),
+              );
+            }
+          });
+          dayDataList.add(DayData(udata));
+        } else {
+          dayDataList.add(DayData([
+            UserChallengeData(
+              false,
+              "",
+              [],
+              "",
+            ),
+          ]));
+        }
+      }
+      setState(() {
+        loading = false;
+      });
+    });
+    // return true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -332,11 +387,9 @@ class _ZoomScaffoldOEState extends State<ZoomScaffoldOE>
                                       Map dataValue = data[i < 9
                                           ? "day0${i + 1}"
                                           : "day${i + 1}"];
-                                      debugPrint(dataValue.toString());
                                       List<UserChallengeData> udata = [];
                                       dataValue.forEach((k, v) {
                                         list = dataValue[k];
-
                                         for (var v in list) {
                                           udata.add(
                                             UserChallengeData(
@@ -347,7 +400,6 @@ class _ZoomScaffoldOEState extends State<ZoomScaffoldOE>
                                             ),
                                           );
                                         }
-                                        debugPrint(list[0].toString());
                                       });
                                       dayDataList.add(DayData(udata));
                                     } else {
@@ -367,117 +419,139 @@ class _ZoomScaffoldOEState extends State<ZoomScaffoldOE>
                                   // setState(() {
                                   userID = user!.uid;
                                   // });
-                                  return GridView.builder(
-                                    shrinkWrap: true,
-                                    physics: const ClampingScrollPhysics(),
-                                    scrollDirection: Axis.vertical,
-                                    padding: const EdgeInsets.all(10.0),
-                                    gridDelegate:
-                                        const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 3,
-                                      childAspectRatio: 1.0,
-                                      crossAxisSpacing: 10.0,
-                                      mainAxisSpacing: 10.0,
-                                    ),
-                                    itemCount: dayDataList.length,
-                                    itemBuilder: (context, i) {
-                                      // debugPrint(userID);
-                                      debugPrint(
-                                          dayDataList[i].userData[0].userId);
-                                      UserChallengeData u1 = dayDataList[i]
-                                          .userData
-                                          .firstWhere(
-                                              (element) =>
-                                                  element.userId == userID,
-                                              orElse: () => UserChallengeData(
-                                                  false, "", [], ""));
-                                      if (u1.isDone) {
-                                        return SizedBox(
-                                          width: 200.0,
-                                          height: 200.0,
-                                          child: ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          7.0)),
-                                              backgroundColor: Colors.blue[100],
-                                            ),
-                                            child: Container(
-                                                padding:
-                                                    const EdgeInsets.all(5.0),
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    const SizedBox(
-                                                      height: 5.0,
-                                                    ),
-                                                    Text(
+                                  return loading
+                                      ? const Center(
+                                          child: CircularProgressIndicator(),
+                                        )
+                                      : GridView.builder(
+                                          shrinkWrap: true,
+                                          physics:
+                                              const ClampingScrollPhysics(),
+                                          scrollDirection: Axis.vertical,
+                                          padding: const EdgeInsets.all(10.0),
+                                          gridDelegate:
+                                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: 3,
+                                            childAspectRatio: 1.0,
+                                            crossAxisSpacing: 10.0,
+                                            mainAxisSpacing: 10.0,
+                                          ),
+                                          itemCount: dayDataList.length,
+                                          itemBuilder: (context, i) {
+                                            UserChallengeData u1 =
+                                                dayDataList[i]
+                                                    .userData
+                                                    .firstWhere(
+                                                        (element) =>
+                                                            element.userId ==
+                                                            userID,
+                                                        orElse: () =>
+                                                            UserChallengeData(
+                                                                false,
+                                                                "",
+                                                                [],
+                                                                ""));
+                                            if (u1.isDone) {
+                                              return SizedBox(
+                                                width: 200.0,
+                                                height: 200.0,
+                                                child: ElevatedButton(
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        7.0)),
+                                                    backgroundColor:
+                                                        Colors.blue[100],
+                                                  ),
+                                                  child: Container(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              5.0),
+                                                      child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          const SizedBox(
+                                                            height: 5.0,
+                                                          ),
+                                                          Text(
+                                                            'DAY - ${i + 1}',
+                                                            style:
+                                                                const TextStyle(
+                                                                    color: Colors
+                                                                        .black),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 5.0,
+                                                          ),
+                                                          const Icon(
+                                                            Icons.check,
+                                                            color: Colors.black,
+                                                          )
+                                                        ],
+                                                      )),
+                                                  onPressed: () async {
+                                                    await Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            AdvanceYoga(
+                                                          dayNumber: i,
+                                                          userChallengeDataList:
+                                                              dayDataList[i]
+                                                                  .userData,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              );
+                                            }
+                                            return SizedBox(
+                                              width: 200.0,
+                                              height: 200.0,
+                                              child: ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              7.0)),
+                                                  backgroundColor:
+                                                      Colors.blue[100],
+                                                ),
+                                                child: Container(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            5.0),
+                                                    child: Text(
                                                       'DAY - ${i + 1}',
                                                       style: const TextStyle(
                                                           color: Colors.black),
+                                                    )),
+                                                onPressed: () async {
+                                                  await Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          AdvanceYoga(
+                                                        dayNumber: i,
+                                                        userChallengeDataList:
+                                                            dayDataList[i]
+                                                                .userData,
+                                                      ),
                                                     ),
-                                                    const SizedBox(
-                                                      height: 5.0,
-                                                    ),
-                                                    const Icon(
-                                                      Icons.check,
-                                                      color: Colors.black,
-                                                    )
-                                                  ],
-                                                )),
-                                            onPressed: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      AdvanceYoga(
-                                                    dayNumber: i,
-                                                    userChallengeDataList:
-                                                        dayDataList[i].userData,
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        );
-                                      }
-                                      return SizedBox(
-                                        width: 200.0,
-                                        height: 200.0,
-                                        child: ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(7.0)),
-                                            backgroundColor: Colors.blue[100],
-                                          ),
-                                          child: Container(
-                                              padding:
-                                                  const EdgeInsets.all(5.0),
-                                              child: Text(
-                                                'DAY - ${i + 1}',
-                                                style: const TextStyle(
-                                                    color: Colors.black),
-                                              )),
-                                          onPressed: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    AdvanceYoga(
-                                                  dayNumber: i,
-                                                  userChallengeDataList:
-                                                      dayDataList[i].userData,
-                                                ),
+                                                  );
+                                                  fetchDataChallenge();
+                                                },
                                               ),
                                             );
                                           },
-                                        ),
-                                      );
-                                    },
-                                  );
+                                        );
                                 }
                                 return const Center(
                                     child: CircularProgressIndicator());

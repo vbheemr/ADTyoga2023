@@ -9,10 +9,11 @@ import 'YogaInfoList.dart';
 class AdvanceYoga extends StatefulWidget {
   final int dayNumber;
   final List<UserChallengeData> userChallengeDataList;
-  const AdvanceYoga(
-      {super.key,
-      required this.dayNumber,
-      required this.userChallengeDataList});
+  const AdvanceYoga({
+    super.key,
+    required this.dayNumber,
+    required this.userChallengeDataList,
+  });
 
   @override
   State<AdvanceYoga> createState() => _AdvanceYogaState();
@@ -106,7 +107,7 @@ class _AdvanceYogaState extends State<AdvanceYoga> {
                         padding:
                             const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 10.0),
                         child: Text(
-                          "You have already provided the Asana's you did for this day on ${DateFormat('MM/dd/yyyy, hh:mm a').format(DateTime.fromMillisecondsSinceEpoch((int.parse(userChallengeData.timeStamp) * 1000)))}.",
+                          "You have already provided the Asana's you did for this day on ${DateFormat('MM/dd/yyyy, hh:mm a').format(DateTime.fromMillisecondsSinceEpoch((int.parse(userChallengeData.timeStamp))))}.",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14.0,
@@ -230,7 +231,7 @@ class _AdvanceYogaState extends State<AdvanceYoga> {
                             );
                           }
                         }
-                        return const CircularProgressIndicator();
+                        return const Center(child: CircularProgressIndicator());
                       },
                     ),
                     userChallengeData.isDone
