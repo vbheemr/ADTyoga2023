@@ -173,6 +173,7 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: const Color(0xFF0F2985),
+        disabledColor: Colors.black,
       ),
       home: const SplashScreen(),
     );

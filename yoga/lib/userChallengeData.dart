@@ -1,8 +1,8 @@
 class UserChallengeData {
-  final bool isDone;
-  final String userId;
-  final List<int> posesDone;
-  final String timeStamp;
+  bool isDone;
+  String userId;
+  List<int> posesDone;
+  String timeStamp;
 
   UserChallengeData(this.isDone, this.userId, this.posesDone, this.timeStamp);
 

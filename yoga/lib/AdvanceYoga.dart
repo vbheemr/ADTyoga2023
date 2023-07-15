@@ -32,7 +32,8 @@ class _AdvanceYogaState extends State<AdvanceYoga> {
       userChallengeData = widget.userChallengeDataList.firstWhere(
           (element) => element.userId == userID,
           orElse: () => UserChallengeData(false, "", [], ""));
-      selectedData = userChallengeData.posesDone;
+
+      selectedData = List<int>.from(userChallengeData.posesDone);
       userChallengeDataList = widget.userChallengeDataList;
     });
   }
@@ -75,6 +76,8 @@ class _AdvanceYogaState extends State<AdvanceYoga> {
 
   List<YogaInfoList> yogaList = [];
 
+  bool edit = true;
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -89,12 +92,44 @@ class _AdvanceYogaState extends State<AdvanceYoga> {
         appBar: AppBar(
           backgroundColor: const Color(0xFF0F2985),
           centerTitle: true,
+          actions: [
+            userChallengeData.timeStamp == ""
+                ? const SizedBox()
+                : IconButton(
+                    onPressed: () {
+                      edit
+                          ? setState(() {
+                              edit = false;
+                              userChallengeData = UserChallengeData(
+                                false,
+                                userID,
+                                userChallengeData.posesDone,
+                                userChallengeData.timeStamp,
+                              );
+                            })
+                          : setState(() {
+                              edit = true;
+                              userChallengeData = UserChallengeData(
+                                true,
+                                userChallengeData.userId,
+                                userChallengeData.posesDone,
+                                userChallengeData.timeStamp,
+                              );
+                            });
+                    },
+                    icon: Icon(
+                      edit ? Icons.edit : Icons.undo,
+                      size: 26.0,
+                    ),
+                  ),
+          ],
           title: const Text(
             'Yoga for Life',
             style: TextStyle(
-                color: Colors.white,
-                fontSize: 21.0,
-                fontWeight: FontWeight.bold),
+              color: Colors.white,
+              fontSize: 21.0,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         body: isLoading
@@ -249,22 +284,43 @@ class _AdvanceYogaState extends State<AdvanceYoga> {
                   List pushingData = [];
                   FirebaseAuth auth = FirebaseAuth.instance;
                   User? user = auth.currentUser;
+                  if (edit) {
+                    userChallengeDataList
+                        .removeWhere((element) => element.isDone == false);
 
-                  userChallengeDataList
-                      .removeWhere((element) => element.isDone == false);
+                    userChallengeDataList.add(UserChallengeData(
+                        true,
+                        user!.uid,
+                        selectedData,
+                        (DateTime.now().millisecondsSinceEpoch).toString()));
 
-                  userChallengeDataList.add(UserChallengeData(
-                      true,
-                      user!.uid,
-                      selectedData,
-                      (DateTime.now().millisecondsSinceEpoch).toString()));
+                    for (var i = 0;
+                        i < widget.userChallengeDataList.length;
+                        i++) {
+                      Map jsonData = userChallengeDataList[i]
+                          .toJson(userChallengeDataList[i]);
+                      pushingData.add(jsonData);
+                    }
+                  } else {
+                    // Actual Edit Code
+                    debugPrint("EDIT CODE");
+                    userChallengeDataList.removeWhere((element) =>
+                        element.isDone == false && element.timeStamp == "");
+                    int val = userChallengeDataList
+                        .indexWhere((element) => element.userId == userID);
+                    userChallengeDataList[val] = UserChallengeData(
+                        true,
+                        user!.uid,
+                        selectedData,
+                        (DateTime.now().millisecondsSinceEpoch).toString());
 
-                  for (var i = 0;
-                      i < widget.userChallengeDataList.length;
-                      i++) {
-                    Map jsonData = userChallengeDataList[i]
-                        .toJson(userChallengeDataList[i]);
-                    pushingData.add(jsonData);
+                    for (var i = 0;
+                        i < widget.userChallengeDataList.length;
+                        i++) {
+                      Map jsonData = userChallengeDataList[i]
+                          .toJson(userChallengeDataList[i]);
+                      pushingData.add(jsonData);
+                    }
                   }
                   FirebaseDatabase.instance
                       .refFromURL(

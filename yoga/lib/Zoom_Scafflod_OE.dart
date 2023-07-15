@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:yoga/ProfileScreen.dart';
 import 'package:yoga/dayData.dart';
 import 'package:yoga/userChallengeData.dart';
 import 'AdvanceYoga.dart';
@@ -199,6 +200,18 @@ class _ZoomScaffoldOEState extends State<ZoomScaffoldOE>
                 appBar: AppBar(
                   backgroundColor: const Color(0xFF0F2985),
                   centerTitle: true,
+                  actions: [
+                    IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProfileScreen(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.person))
+                  ],
                   title: const Text(
                     'Yoga for Life',
                     style: TextStyle(
@@ -273,10 +286,11 @@ class _ZoomScaffoldOEState extends State<ZoomScaffoldOE>
                                       padding: const EdgeInsets.all(10.0),
                                       gridDelegate:
                                           const SliverGridDelegateWithFixedCrossAxisCount(
-                                              crossAxisCount: 2,
-                                              childAspectRatio: 1.0,
-                                              crossAxisSpacing: 5,
-                                              mainAxisSpacing: 5),
+                                        crossAxisCount: 2,
+                                        childAspectRatio: 1.0,
+                                        crossAxisSpacing: 10.0,
+                                        mainAxisSpacing: 10.0,
+                                      ),
                                       itemCount: yogaImageList.length,
                                       itemBuilder: (context, i) => SizedBox(
                                         child: ElevatedButton(
@@ -285,7 +299,8 @@ class _ZoomScaffoldOEState extends State<ZoomScaffoldOE>
                                               borderRadius:
                                                   BorderRadius.circular(7.0),
                                             ),
-                                            backgroundColor: Colors.blue[200],
+                                            backgroundColor: Colors.white,
+                                            padding: const EdgeInsets.all(0.0),
                                           ),
                                           child: SizedBox(
                                             // padding: const EdgeInsets.all(5.0),
@@ -307,8 +322,8 @@ class _ZoomScaffoldOEState extends State<ZoomScaffoldOE>
                                                     child: Image(
                                                       image: yogaImageList[i]
                                                           .asset,
-                                                      height: 120.0,
-                                                      width: 120.0,
+                                                      height: 160.0,
+                                                      width: 160.0,
                                                       fit: BoxFit.contain,
                                                     ),
                                                   ),
@@ -426,7 +441,7 @@ class _ZoomScaffoldOEState extends State<ZoomScaffoldOE>
                                       : GridView.builder(
                                           shrinkWrap: true,
                                           physics:
-                                              const ClampingScrollPhysics(),
+                                              const BouncingScrollPhysics(),
                                           scrollDirection: Axis.vertical,
                                           padding: const EdgeInsets.all(10.0),
                                           gridDelegate:

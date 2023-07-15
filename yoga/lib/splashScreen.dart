@@ -68,7 +68,6 @@ class _SplashScreenState extends State<SplashScreen> {
                   softWrap: true,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontFamily: 'Lobster',
                     fontSize: 30.0,
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
