@@ -1,10 +1,8 @@
 # Yoga Challenge Mobile Application
 
-Welcome to Yoga Challenge Mobile Application. This document provides an overview of the issues we're currently experiencing, how to install the APK file for Android users, and why direct installation of the IPA file for iOS users isn't feasible. 
+Welcome to Yoga Challenge Mobile Application.
 
-## Status Update: Deployment Issue
-
-Due to unforeseen issues with our Mobile Interface, the direct deployment of our Yoga Theme Mobile Application is currently not possible. We're actively working to address this problem and hope to have the app up and running again soon. In the meantime, we have an APK file for Android users. However, these files need to be installed explicitly. Please refer to the respective sections below for more details.
+This document provides an overview of how to install the APK file for Android users, and why direct installation of the IPA file for iOS users isn't feasible. We have an APK file for Android users. Please refer to the respective sections below for more details.
 
 ## For Android Users: How to Install APK File
 
