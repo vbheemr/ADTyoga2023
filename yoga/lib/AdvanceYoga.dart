@@ -123,9 +123,9 @@ class _AdvanceYogaState extends State<AdvanceYoga> {
                     ),
                   ),
           ],
-          title: const Text(
-            'Yoga for Life',
-            style: TextStyle(
+          title: Text(
+            "Day ${widget.dayNumber + 1}",
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 21.0,
               fontWeight: FontWeight.bold,
